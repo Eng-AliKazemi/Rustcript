@@ -1,0 +1,973 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rustcript | The flexibility of the Rust</title>
+
+    <!-- Favicon -->
+    <link rel="icon" href="favicon.ico" type="image/x-icon">
+
+    <!-- Bootstrap CSS (Grid & Layout Utilities) -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <!-- AOS Animation Library -->
+    <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
+
+    <!-- PrismJS for Syntax Highlighting -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet" />
+
+    <!-- FontAwesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <!-- TailwindCSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- Custom Theme Configuration -->
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        rust: {
+                            light: '#E89F71',
+                            DEFAULT: '#C86B3D', /* Logo Orange */
+                            dark: '#A04D26',
+                        },
+                        script: {
+                            light: '#E2E8F0',
+                            DEFAULT: '#64748B', /* Slate 500 */
+                            dark: '#334155',    /* Slate 700 */
+                            darker: '#0F172A'   /* Slate 900 */
+                        },
+                        mainbg: '#ffffff',
+                        altbg: '#f8fafc',
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        mono: ['Fira Code', 'monospace'],
+                    },
+                    boxShadow: {
+                        'soft': '0 10px 40px -10px rgba(0,0,0,0.08)',
+                        'glow': '0 0 20px rgba(200, 107, 61, 0.4)',
+                    },
+                    animation: {
+                        'float': 'float 6s ease-in-out infinite',
+                        'spin-slow': 'spin 12s linear infinite',
+                    },
+                    keyframes: {
+                        float: {
+                            '0%, 100%': { transform: 'translateY(0)' },
+                            '50%': { transform: 'translateY(-20px)' },
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+
+    <!-- Custom CSS -->
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;600&family=Inter:wght@300;400;600;700;800&display=swap');
+
+        body { font-family: 'Inter', sans-serif; }
+        .code-font { font-family: 'Fira Code', monospace; }
+
+        /* Hexagon Background Pattern (Light Version) */
+        .hex-bg {
+            background-color: #ffffff;
+            background-image: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%2394a3b8' fill-opacity='0.08'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+        }
+
+        .bg-grid-pattern {
+            background-image: linear-gradient(rgba(200, 107, 61, 0.05) 1px, transparent 1px), linear-gradient(to right, rgba(200, 107, 61, 0.05) 1px, transparent 1px);
+            background-size: 2rem 2rem;
+        }
+
+        .nav-glass {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(8px);
+            border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar { width: 10px; }
+        ::-webkit-scrollbar-track { background: #f1f5f9; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 5px; border: 2px solid #f1f5f9; }
+        ::-webkit-scrollbar-thumb:hover { background: #C86B3D; }
+
+        .feature-icon {
+            width: 48px;
+            height: 48px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 12px;
+            margin-bottom: 1rem;
+            font-size: 1.25rem;
+            transition: all 0.3s ease;
+        }
+
+        .card-hover:hover .feature-icon { transform: scale(1.1); }
+
+        .category-btn.active {
+            background-color: #fff;
+            color: #C86B3D;
+            font-weight: 700;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+            border-left: 3px solid #C86B3D;
+        }
+
+        .file-tab-btn.active {
+            background-color: #334155;
+            color: #fff;
+        }
+    </style>
+</head>
+<body class="bg-mainbg text-slate-800 antialiased selection:bg-rust selection:text-white">
+
+    <!-- Navigation -->
+    <nav class="fixed w-full z-50 transition-all duration-300 nav-glass" id="navbar">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center h-20">
+                <div class="flex items-center space-x-3 cursor-pointer group" onclick="window.scrollTo(0,0)">
+                    <img src="logo.png" alt="Rustcript Logo" class="h-10 w-10 group-hover:rotate-12 transition duration-300">
+                    <span class="text-2xl font-bold text-slate-800 tracking-tight">Rust<span class="text-rust">cript</span></span>
+                </div>
+                <div class="hidden xl:flex space-x-6 items-center">
+                    <a href="#philosophy" class="text-sm font-medium text-slate-600 hover:text-rust transition">Philosophy</a>
+                    <a href="#features" class="text-sm font-medium text-slate-600 hover:text-rust transition">Features</a>
+                    <a href="#use-cases" class="text-sm font-medium text-slate-600 hover:text-rust transition">Use Cases</a>
+                    <a href="#business-value" class="text-sm font-medium text-slate-600 hover:text-rust transition">Business Value</a>
+                    <a href="#integration" class="text-sm font-medium text-slate-600 hover:text-rust transition">Integration</a>
+                    <a href="#testing" class="text-sm font-medium text-slate-600 hover:text-rust transition">Testing</a>
+                    <a href="#ai" class="text-sm font-medium text-slate-600 hover:text-rust transition"><i class="fas fa-robot mr-1 text-rust"></i> AI</a>
+                    <a href="#community" class="text-sm font-medium text-slate-600 hover:text-rust transition">Community</a>
+                    <a href="https://github.com/Eng-AliKazemi/Rustcript" target="_blank" class="px-5 py-2.5 bg-slate-900 hover:bg-rust text-white rounded-lg font-bold transition text-sm shadow-lg shadow-slate-200">
+                        <i class="fab fa-github mr-2"></i> GitHub
+                    </a>
+                </div>
+                <!-- Mobile Menu Button -->
+                <div class="xl:hidden text-slate-600 text-xl cursor-pointer">
+                    <i class="fas fa-bars"></i>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="relative min-h-screen flex items-center justify-center pt-32 md:pt-40 overflow-hidden hex-bg">
+        <div class="absolute top-0 left-0 w-full h-full bg-gradient-to-b from-transparent to-white pointer-events-none"></div>
+        <div class="absolute top-1/4 left-1/4 w-[500px] h-[500px] bg-rust/5 rounded-full blur-[100px] animate-pulse-slow"></div>
+        <div class="absolute bottom-1/4 right-1/4 w-[600px] h-[600px] bg-blue-100/50 rounded-full blur-[100px] animate-pulse-slow" style="animation-delay: 2s;"></div>
+
+        <div class="container mx-auto px-4 text-center z-10">
+            <div class="flex flex-col items-center justify-center">
+                <!-- Logo with Frames -->
+                <div class="relative w-64 h-64 md:w-80 md:h-80 mb-10 animate-float" data-aos="zoom-in" data-aos-duration="1200">
+                    <div class="absolute inset-0 border-2 border-rust/30 rotate-45 rounded-[3rem] scale-110"></div>
+                    <div class="absolute inset-0 border-2 border-script/20 -rotate-12 rounded-[3rem] scale-125"></div>
+                    <div class="absolute inset-0 bg-rust/10 rounded-full blur-3xl"></div>
+                    <img src="logo.png" alt="Rustcript Seahorse" class="w-full h-full object-contain drop-shadow-2xl relative z-10">
+                </div>
+
+                <div data-aos="fade-up" data-aos-delay="200">
+                    <div class="inline-flex items-center space-x-2 px-4 py-1.5 rounded-full border border-rust/20 bg-orange-50 text-rust text-xs font-bold uppercase tracking-widest mb-6 shadow-sm">
+                        <span class="w-2 h-2 rounded-full bg-rust animate-pulse"></span>
+                        <span>v1.0 Public Release</span>
+                    </div>
+                    <h1 class="text-5xl md:text-7xl lg:text-8xl font-black text-slate-900 mb-6 tracking-tight leading-none">
+                        The Brain for your <br>
+                        <span class="text-transparent bg-clip-text bg-gradient-to-r from-rust to-orange-500">Rust Engine</span>
+                    </h1>
+                </div>
+
+                <p class="text-xl md:text-2xl text-slate-500 max-w-3xl mx-auto mb-12 leading-relaxed font-medium" data-aos="fade-up" data-aos-delay="400">
+                    A secure, high-performance embedded scripting language designed to orchestrate Rust applications without recompilation.
+                </p>
+
+                <div class="flex flex-col sm:flex-row gap-5 justify-center" data-aos="fade-up" data-aos-delay="600">
+                    <a href="https://github.com/Eng-AliKazemi/Rustcript" class="px-10 py-5 bg-rust text-white rounded-xl font-bold text-xl hover:bg-rust-dark transition shadow-glow hover:-translate-y-1 flex items-center justify-center">
+                        <i class="fas fa-rocket mr-3"></i> Get Started
+                    </a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Philosophy Section -->
+    <section id="philosophy" class="py-24 bg-white relative border-b border-slate-100">
+        <div class="container mx-auto px-6">
+            <div class="grid lg:grid-cols-2 gap-16 items-center">
+                <div data-aos="fade-right">
+                    <h2 class="text-rust font-bold tracking-widest uppercase mb-3 text-sm">Core Philosophy</h2>
+                    <h3 class="text-4xl font-bold text-slate-900 mb-6 flex items-center"><i class="fas fa-sitemap text-rust mr-4"></i>Engine vs. Brain</h3>
+                    <p class="text-slate-600 text-lg mb-8 leading-relaxed">
+                        Rust is the high-performance <strong>Engine</strong>. Rustcript is the flexible <strong>Brain</strong>. This separation allows you to update logic on-the-fly without recompiling the host.
+                    </p>
+
+                    <div class="space-y-6">
+                        <div class="flex p-5 rounded-2xl bg-slate-50 border border-slate-100 hover:shadow-soft transition group">
+                            <div class="flex-shrink-0 w-14 h-14 rounded-xl bg-white flex items-center justify-center border border-slate-200 shadow-sm group-hover:scale-110 transition">
+                                <i class="fab fa-rust text-3xl text-black"></i>
+                            </div>
+                            <div class="ml-5">
+                                <h4 class="text-xl font-bold text-slate-800">The Engine (Rust)</h4>
+                                <p class="text-slate-500 text-sm mt-1">Compiled once. Handles infrastructure, networking, and heavy lifting.</p>
+                            </div>
+                        </div>
+                        <div class="flex p-5 rounded-2xl bg-orange-50 border border-orange-100 hover:shadow-soft transition group">
+                            <div class="flex-shrink-0 w-14 h-14 rounded-xl bg-white flex items-center justify-center border border-orange-200 shadow-sm group-hover:scale-110 transition">
+                                <i class="fas fa-brain text-3xl text-rust"></i>
+                            </div>
+                            <div class="ml-5">
+                                <h4 class="text-xl font-bold text-slate-800">The Brain (Rustcript)</h4>
+                                <p class="text-slate-500 text-sm mt-1">Hot-swappable. Defines quests, workflows, and business rules.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="relative" data-aos="fade-left">
+                    <div class="bg-white rounded-2xl border border-slate-200 p-8 shadow-2xl relative overflow-hidden">
+                        <div class="absolute top-0 right-0 w-40 h-40 bg-gradient-to-bl from-rust/10 to-transparent rounded-bl-full"></div>
+
+                        <div class="space-y-6 relative z-10">
+                            <div class="text-center font-bold text-slate-400 text-xs tracking-widest uppercase mb-2">Execution Pipeline</div>
+                            <div class="flex items-center justify-between bg-slate-50 p-5 rounded-xl border border-slate-200 shadow-sm">
+                                <div>
+                                    <div class="font-mono text-sm text-rust font-bold">src/main.rs</div>
+                                    <div class="text-xs text-slate-400 font-bold uppercase mt-1">Host Application</div>
+                                </div>
+                                <i class="fas fa-server text-slate-300"></i>
+                            </div>
+                            <div class="flex justify-center text-slate-300"><i class="fas fa-arrow-down animate-bounce"></i></div>
+                            <div class="bg-gradient-to-br from-rust to-rust-dark p-6 rounded-xl shadow-lg text-white relative overflow-hidden">
+                                <div class="absolute -right-4 -top-4 w-16 h-16 bg-white/20 rounded-full blur-xl"></div>
+                                <div class="text-center relative z-10">
+                                    <div class="font-bold text-xl mb-1"><i class="fas fa-cogs mr-2"></i> Rustcript Interpreter</div>
+                                    <div class="text-xs text-orange-100 opacity-90 font-mono">Parsing &bull; Optimization &bull; Sandboxing</div>
+                                </div>
+                            </div>
+                            <div class="flex justify-center text-slate-300"><i class="fas fa-arrow-down animate-bounce"></i></div>
+                            <div class="grid grid-cols-2 gap-4">
+                                <div class="bg-slate-50 p-4 rounded-xl border border-slate-200 shadow-sm text-center hover:border-rust transition cursor-default">
+                                    <i class="fas fa-file-code text-slate-400 mb-2 text-2xl"></i>
+                                    <div class="text-xs text-slate-600 font-bold font-mono">logic.rc</div>
+                                </div>
+                                <div class="bg-slate-50 p-4 rounded-xl border border-slate-200 shadow-sm text-center hover:border-rust transition cursor-default">
+                                    <i class="fas fa-database text-slate-400 mb-2 text-2xl"></i>
+                                    <div class="text-xs text-slate-600 font-bold font-mono">UserData</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Advantages for Embedders Grid -->
+            <div class="mt-24 bg-altbg rounded-3xl p-10 border border-slate-200" data-aos="fade-up">
+                <h3 class="text-2xl font-bold text-slate-900 mb-10 text-center">Why Embed Rustcript?</h3>
+                <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
+                    <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 hover:-translate-y-1 transition duration-300">
+                        <div class="text-rust text-3xl mb-4"><i class="fas fa-link"></i></div>
+                        <h4 class="font-bold text-slate-800 mb-2">Safe Native Interop</h4>
+                        <p class="text-sm text-slate-500 leading-relaxed">Expose Rust structs (DB connections, configs) directly to scripts via the <code>RustcriptObject</code> trait.</p>
+                    </div>
+                    <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 hover:-translate-y-1 transition duration-300">
+                        <div class="text-blue-500 text-3xl mb-4"><i class="fas fa-lock"></i></div>
+                        <h4 class="font-bold text-slate-800 mb-2">Sandboxed & Secure</h4>
+                        <p class="text-sm text-slate-500 leading-relaxed">Scripts can't touch the filesystem by default. You explicitly grant permissions or define a sandbox root.</p>
+                    </div>
+                    <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 hover:-translate-y-1 transition duration-300">
+                        <div class="text-green-500 text-3xl mb-4"><i class="fas fa-shield-alt"></i></div>
+                        <h4 class="font-bold text-slate-800 mb-2">Resilient</h4>
+                        <p class="text-sm text-slate-500 leading-relaxed">Built-in instruction limiter prevents infinite loops from freezing your main application.</p>
+                    </div>
+                    <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 hover:-translate-y-1 transition duration-300">
+                        <div class="text-purple-500 text-3xl mb-4"><i class="fas fa-memory"></i></div>
+                        <h4 class="font-bold text-slate-800 mb-2">No Garbage Collector</h4>
+                        <p class="text-sm text-slate-500 leading-relaxed">Relies on Rust's predictable memory management (Arc/Clone). No "stop-the-world" pauses.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Full Features Grid -->
+    <section id="features" class="py-24 bg-slate-50 border-y border-slate-200">
+        <div class="container mx-auto px-6">
+            <div class="text-center mb-16" data-aos="fade-up">
+                <h2 class="text-3xl font-bold text-slate-900 mb-4 flex items-center justify-center"><i class="fas fa-star text-rust mr-3"></i> Full Capabilities</h2>
+                <p class="text-slate-500 max-w-2xl mx-auto">A comprehensive toolset for modern scripting needs.</p>
+            </div>
+
+            <div class="grid md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                <!-- 1 -->
+                <div class="p-6 bg-white rounded-xl shadow-sm hover:shadow-md transition card-hover" data-aos="fade-up">
+                    <div class="feature-icon bg-orange-100 text-rust"><i class="fas fa-pen-fancy"></i></div>
+                    <h4 class="font-bold text-slate-800 mb-2">Flexible Syntax</h4>
+                    <p class="text-xs text-slate-600">Combines natural assignment (<code>x = 10</code>) with clear, space-separated commands.</p>
+                </div>
+                <!-- 2 -->
+                <div class="p-6 bg-white rounded-xl shadow-sm hover:shadow-md transition card-hover" data-aos="fade-up" data-aos-delay="50">
+                    <div class="feature-icon bg-blue-100 text-blue-600"><i class="fas fa-layer-group"></i></div>
+                    <h4 class="font-bold text-slate-800 mb-2">Rich Type System</h4>
+                    <p class="text-xs text-slate-600">Integers, floats, booleans, strings, tuples, vectors, and hashmaps.</p>
+                </div>
+                <!-- 3 -->
+                <div class="p-6 bg-white rounded-xl shadow-sm hover:shadow-md transition card-hover" data-aos="fade-up" data-aos-delay="100">
+                    <div class="feature-icon bg-green-100 text-green-600"><i class="fas fa-code-branch"></i></div>
+                    <h4 class="font-bold text-slate-800 mb-2">Structured Control</h4>
+                    <p class="text-xs text-slate-600">Modern <code>if/else</code>, <code>match</code>, <code>while</code>, <code>for</code>, <code>foreach</code>, and <code>try/catch</code>.</p>
+                </div>
+                <!-- 4 -->
+                <div class="p-6 bg-white rounded-xl shadow-sm hover:shadow-md transition card-hover" data-aos="fade-up" data-aos-delay="150">
+                    <div class="feature-icon bg-purple-100 text-purple-600"><i class="fas fa-cubes"></i></div>
+                    <h4 class="font-bold text-slate-800 mb-2">Modular Design</h4>
+                    <p class="text-xs text-slate-600">Import script files into others with namespacing support.</p>
+                </div>
+                <!-- 5 -->
+                <div class="p-6 bg-white rounded-xl shadow-sm hover:shadow-md transition card-hover" data-aos="fade-up" data-aos-delay="200">
+                    <div class="feature-icon bg-yellow-100 text-yellow-600"><i class="fas fa-toolbox"></i></div>
+                    <h4 class="font-bold text-slate-800 mb-2">Standard Library</h4>
+                    <p class="text-xs text-slate-600">Built-in methods for strings, collections, math, random, and JSON.</p>
+                </div>
+                <!-- 6 -->
+                <div class="p-6 bg-white rounded-xl shadow-sm hover:shadow-md transition card-hover" data-aos="fade-up" data-aos-delay="250">
+                    <div class="feature-icon bg-red-100 text-red-600"><i class="fas fa-bug"></i></div>
+                    <h4 class="font-bold text-slate-800 mb-2">Error Reporting</h4>
+                    <p class="text-xs text-slate-600">Runtime errors reported with exact source line numbers.</p>
+                </div>
+                <!-- 7: First-Class Funcs -->
+                <div class="p-6 bg-white rounded-xl shadow-sm hover:shadow-md transition card-hover" data-aos="fade-up" data-aos-delay="300">
+                    <div class="feature-icon bg-indigo-100 text-indigo-600"><i class="fas fa-code"></i></div>
+                    <h4 class="font-bold text-slate-800 mb-2">First-Class Funcs</h4>
+                    <p class="text-xs text-slate-600">Store functions in variables and pass them as arguments.</p>
+                </div>
+                <!-- 8: Full Functions -->
+                <div class="p-6 bg-white rounded-xl shadow-sm hover:shadow-md transition card-hover" data-aos="fade-up" data-aos-delay="350">
+                    <div class="feature-icon bg-pink-100 text-pink-600"><i class="fas fa-project-diagram"></i></div>
+                    <h4 class="font-bold text-slate-800 mb-2">Full Functions</h4>
+                    <p class="text-xs text-slate-600">Supports arguments, return values, scope isolation, and recursion.</p>
+                </div>
+                <!-- 9 -->
+                <div class="p-6 bg-white rounded-xl shadow-sm hover:shadow-md transition card-hover" data-aos="fade-up" data-aos-delay="400">
+                    <div class="feature-icon bg-cyan-100 text-cyan-600"><i class="fas fa-exchange-alt"></i></div>
+                    <h4 class="font-bold text-slate-800 mb-2">Rust Interop</h4>
+                    <p class="text-xs text-slate-600">Safely wrap native Rust structs and expose them via <code>RustcriptObject</code>.</p>
+                </div>
+                <!-- 10 -->
+                <div class="p-6 bg-white rounded-xl shadow-sm hover:shadow-md transition card-hover" data-aos="fade-up" data-aos-delay="450">
+                    <div class="feature-icon bg-gray-200 text-gray-700"><i class="fas fa-shield-alt"></i></div>
+                    <h4 class="font-bold text-slate-800 mb-2">Security First</h4>
+                    <p class="text-xs text-slate-600">OS exec and File I/O disabled by default. Must be enabled at compile time.</p>
+                </div>
+                <!-- 11 -->
+                <div class="p-6 bg-white rounded-xl shadow-sm hover:shadow-md transition card-hover" data-aos="fade-up" data-aos-delay="500">
+                    <div class="feature-icon bg-teal-100 text-teal-600"><i class="fas fa-box-open"></i></div>
+                    <h4 class="font-bold text-slate-800 mb-2">Sandboxed I/O</h4>
+                    <p class="text-xs text-slate-600">File operations confined to designated directory. Granular permissions.</p>
+                </div>
+                <!-- 12 -->
+                <div class="p-6 bg-white rounded-xl shadow-sm hover:shadow-md transition card-hover" data-aos="fade-up" data-aos-delay="550">
+                    <div class="feature-icon bg-rose-100 text-rose-600"><i class="fas fa-stopwatch"></i></div>
+                    <h4 class="font-bold text-slate-800 mb-2">Execution Safety</h4>
+                    <p class="text-xs text-slate-600">Instruction counter prevents infinite loops from hanging the host.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Use Cases -->
+    <section id="use-cases" class="py-24 bg-white">
+        <div class="container mx-auto px-6">
+            <div class="text-center mb-16" data-aos="fade-up">
+                <h2 class="text-3xl font-bold text-slate-900 mb-4 flex items-center justify-center"><i class="fas fa-tasks text-rust mr-3"></i> Use Cases</h2>
+                <p class="text-slate-500">Rustcript excels as a "glue language" to orchestrate Rust components.</p>
+            </div>
+
+            <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <!-- Use Case 1 -->
+                <div class="flex flex-col p-6 rounded-2xl bg-altbg hover:bg-white hover:shadow-xl transition duration-300 border border-slate-100 group" data-aos="fade-up">
+                    <div class="w-16 h-16 rounded-2xl bg-rust/10 flex items-center justify-center mb-4 group-hover:scale-110 transition">
+                        <i class="fas fa-gamepad text-rust text-4xl"></i>
+                    </div>
+                    <h4 class="font-bold text-slate-800 text-lg">Embedded Scripting</h4>
+                    <p class="text-sm text-slate-600 mt-2 leading-relaxed">Define application behavior (quests, dialogues, AI) that can be changed without recompiling.</p>
+                </div>
+
+                <!-- Use Case 2 -->
+                <div class="flex flex-col p-6 rounded-2xl bg-altbg hover:bg-white hover:shadow-xl transition duration-300 border border-slate-100 group" data-aos="fade-up" data-aos-delay="100">
+                    <div class="w-16 h-16 rounded-2xl bg-blue-100 flex items-center justify-center mb-4 group-hover:scale-110 transition">
+                        <i class="fas fa-database text-blue-600 text-4xl"></i>
+                    </div>
+                    <h4 class="font-bold text-slate-800 text-lg">ETL & Data Pipelines</h4>
+                    <p class="text-sm text-slate-600 mt-2 leading-relaxed">Automate complex data processing workflows: extract, transform, and load using sandboxed I/O.</p>
+                </div>
+
+                <!-- Use Case 3 -->
+                <div class="flex flex-col p-6 rounded-2xl bg-altbg hover:bg-white hover:shadow-xl transition duration-300 border border-slate-100 group" data-aos="fade-up" data-aos-delay="200">
+                    <div class="w-16 h-16 rounded-2xl bg-green-100 flex items-center justify-center mb-4 group-hover:scale-110 transition">
+                        <i class="fas fa-vial text-green-600 text-4xl"></i>
+                    </div>
+                    <h4 class="font-bold text-slate-800 text-lg">Automated Testing</h4>
+                    <p class="text-sm text-slate-600 mt-2 leading-relaxed">Write readable, step-by-step test cases for applications using the gated <code>os.exec</code> module.</p>
+                </div>
+
+                <!-- Use Case 4 -->
+                <div class="flex flex-col p-6 rounded-2xl bg-altbg hover:bg-white hover:shadow-xl transition duration-300 border border-slate-100 group" data-aos="fade-up" data-aos-delay="300">
+                    <div class="w-16 h-16 rounded-2xl bg-orange-100 flex items-center justify-center mb-4 group-hover:scale-110 transition">
+                        <i class="fas fa-sliders-h text-orange-600 text-4xl"></i>
+                    </div>
+                    <h4 class="font-bold text-slate-800 text-lg">Dynamic Config</h4>
+                    <p class="text-sm text-slate-600 mt-2 leading-relaxed">Go beyond static files by using scripts to define configuration that changes based on logic.</p>
+                </div>
+
+                <!-- Use Case 5 -->
+                <div class="flex flex-col p-6 rounded-2xl bg-altbg hover:bg-white hover:shadow-xl transition duration-300 border border-slate-100 group" data-aos="fade-up" data-aos-delay="400">
+                    <div class="w-16 h-16 rounded-2xl bg-purple-100 flex items-center justify-center mb-4 group-hover:scale-110 transition">
+                        <i class="fas fa-file-invoice text-purple-600 text-4xl"></i>
+                    </div>
+                    <h4 class="font-bold text-slate-800 text-lg">Report Generation</h4>
+                    <p class="text-sm text-slate-600 mt-2 leading-relaxed">Define the structure and content of automated reports, pulling data from various sources.</p>
+                </div>
+
+                <!-- Use Case 6 -->
+                <div class="flex flex-col p-6 rounded-2xl bg-altbg hover:bg-white hover:shadow-xl transition duration-300 border border-slate-100 group" data-aos="fade-up" data-aos-delay="500">
+                    <div class="w-16 h-16 rounded-2xl bg-indigo-100 flex items-center justify-center mb-4 group-hover:scale-110 transition">
+                        <i class="fas fa-network-wired text-indigo-600 text-4xl"></i>
+                    </div>
+                    <h4 class="font-bold text-slate-800 text-lg">Microservice Logic</h4>
+                    <p class="text-sm text-slate-600 mt-2 leading-relaxed">Implement business logic (validation, routing) within a high-performance Rust service.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Business Value Section -->
+    <section id="business-value" class="py-24 bg-altbg border-y border-slate-200">
+        <div class="container mx-auto px-6">
+            <div class="text-center mb-16" data-aos="fade-up">
+                 <h2 class="text-3xl font-bold text-slate-900 mb-4 flex items-center justify-center">
+                    <i class="fas fa-briefcase text-rust mr-3"></i> The Enterprise Advantage
+                </h2>
+                <p class="text-slate-500 max-w-3xl mx-auto">
+                    Beyond technical features, Rustcript delivers strategic value by bridging the gap between high-performance engineering and the dynamic needs of your business.
+                </p>
+            </div>
+
+            <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+                <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 hover:-translate-y-1 transition duration-300" data-aos="fade-up">
+                    <div class="text-purple-500 text-3xl mb-4"><i class="fas fa-fighter-jet"></i></div>
+                    <h4 class="font-bold text-slate-800 mb-2">Speed & Agility</h4>
+                    <p class="text-sm text-slate-500 leading-relaxed">Update business rules on-the-fly by editing a script. Deploy logic changes in minutes, not hours, without recompiling the core Rust service.</p>
+                </div>
+                 <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 hover:-translate-y-1 transition duration-300" data-aos="fade-up" data-aos-delay="50">
+                    <div class="text-green-500 text-3xl mb-4"><i class="fas fa-users"></i></div>
+                    <h4 class="font-bold text-slate-800 mb-2">Team Empowerment</h4>
+                    <p class="text-sm text-slate-500 leading-relaxed">The simple syntax allows non-Rust developers (analysts, QA) to write and manage logic, freeing up core engineers to focus on infrastructure.</p>
+                </div>
+                 <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 hover:-translate-y-1 transition duration-300" data-aos="fade-up" data-aos-delay="100">
+                    <div class="text-blue-500 text-3xl mb-4"><i class="fas fa-layer-group"></i></div>
+                    <h4 class="font-bold text-slate-800 mb-2">Reduced Complexity</h4>
+                    <p class="text-sm text-slate-500 leading-relaxed">Externalize volatile logic to keep your core Rust codebase smaller, more stable, and easier to maintain, preventing technical debt.</p>
+                </div>
+                 <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 hover:-translate-y-1 transition duration-300" data-aos="fade-up" data-aos-delay="150">
+                    <div class="text-yellow-500 text-3xl mb-4"><i class="fas fa-cogs"></i></div>
+                    <h4 class="font-bold text-slate-800 mb-2">Advanced Orchestration</h4>
+                    <p class="text-sm text-slate-500 leading-relaxed">Perfect for microservices. Use Rust for high-speed message consumption and Rustcript to dynamically filter, route, and process payloads.</p>
+                </div>
+                 <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 hover:-translate-y-1 transition duration-300" data-aos="fade-up" data-aos-delay="200">
+                    <div class="text-cyan-500 text-3xl mb-4"><i class="fas fa-robot"></i></div>
+                    <h4 class="font-bold text-slate-800 mb-2">Powerful Automation</h4>
+                    <p class="text-sm text-slate-500 leading-relaxed">Automate internal business processes, from generating complex custom reports to performing dynamic data cleanup tasks.</p>
+                </div>
+                 <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 hover:-translate-y-1 transition duration-300" data-aos="fade-up" data-aos-delay="250">
+                    <div class="text-red-500 text-3xl mb-4"><i class="fas fa-vial"></i></div>
+                    <h4 class="font-bold text-slate-800 mb-2">Flexible CI/CD Testing</h4>
+                    <p class="text-sm text-slate-500 leading-relaxed">Write powerful, readable end-to-end test scenarios as scripts, allowing QA to build comprehensive test suites without touching core code.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Code Explorer Section -->
+    <section id="code-explorer" class="py-24 bg-white border-y border-slate-200">
+        <div class="container mx-auto px-6">
+            <div class="text-center mb-16" data-aos="fade-up">
+                <h2 class="text-3xl font-bold text-slate-900 mb-4 flex items-center justify-center"><i class="fas fa-file-code text-rust mr-3"></i> Clean, Explicit, Powerful</h2>
+                <p class="text-slate-500 max-w-2xl mx-auto">Explore the official examples to see the language in action.</p>
+            </div>
+
+            <div class="grid lg:grid-cols-12 gap-10">
+                <!-- Category Navigation -->
+                <div class="lg:col-span-3" data-aos="fade-right">
+                    <div class="space-y-2">
+                        <button onclick="switchCategory('basics')" id="btn-cat-basics" class="category-btn active w-full text-left px-6 py-4 rounded-lg bg-slate-50 hover:bg-white transition flex items-center justify-between group shadow-sm border border-transparent hover:border-slate-100">
+                            <span>Basics & I/O</span><i class="fas fa-chevron-right text-slate-300"></i>
+                        </button>
+                        <button onclick="switchCategory('control_flow')" id="btn-cat-control_flow" class="category-btn w-full text-left px-6 py-4 rounded-lg bg-slate-50 hover:bg-white transition flex items-center justify-between group shadow-sm border border-transparent hover:border-slate-100">
+                            <span>Control Flow</span><i class="fas fa-chevron-right text-slate-300"></i>
+                        </button>
+                        <button onclick="switchCategory('data_structures')" id="btn-cat-data_structures" class="category-btn w-full text-left px-6 py-4 rounded-lg bg-slate-50 hover:bg-white transition flex items-center justify-between group shadow-sm border border-transparent hover:border-slate-100">
+                            <span>Data Structures</span><i class="fas fa-chevron-right text-slate-300"></i>
+                        </button>
+                        <button onclick="switchCategory('functions')" id="btn-cat-functions" class="category-btn w-full text-left px-6 py-4 rounded-lg bg-slate-50 hover:bg-white transition flex items-center justify-between group shadow-sm border border-transparent hover:border-slate-100">
+                            <span>Functions & Scopes</span><i class="fas fa-chevron-right text-slate-300"></i>
+                        </button>
+                        <button onclick="switchCategory('modules')" id="btn-cat-modules" class="category-btn w-full text-left px-6 py-4 rounded-lg bg-slate-50 hover:bg-white transition flex items-center justify-between group shadow-sm border border-transparent hover:border-slate-100">
+                            <span>Modules & Imports</span><i class="fas fa-chevron-right text-slate-300"></i>
+                        </button>
+                        <button onclick="switchCategory('stdlib')" id="btn-cat-stdlib" class="category-btn w-full text-left px-6 py-4 rounded-lg bg-slate-50 hover:bg-white transition flex items-center justify-between group shadow-sm border border-transparent hover:border-slate-100">
+                            <span>Standard Library</span><i class="fas fa-chevron-right text-slate-300"></i>
+                        </button>
+                        <button onclick="switchCategory('advanced')" id="btn-cat-advanced" class="category-btn w-full text-left px-6 py-4 rounded-lg bg-slate-50 hover:bg-white transition flex items-center justify-between group shadow-sm border border-transparent hover:border-slate-100">
+                            <span>Advanced & Security</span><i class="fas fa-chevron-right text-slate-300"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Code Window -->
+                <div class="lg:col-span-9" data-aos="fade-left">
+                    <div class="bg-[#1e293b] rounded-2xl overflow-hidden shadow-2xl shadow-slate-300 border border-slate-700 h-full flex flex-col min-h-[500px]">
+                        <div class="bg-[#0f172a] px-4 py-3 flex items-center space-x-2 border-b border-slate-700">
+                            <div class="w-3 h-3 rounded-full bg-red-500"></div>
+                            <div class="w-3 h-3 rounded-full bg-yellow-500"></div>
+                            <div class="w-3 h-3 rounded-full bg-green-500"></div>
+                            <div id="file-tabs-container" class="ml-4 flex items-center gap-2 overflow-x-auto"></div>
+                        </div>
+                        <div id="code-blocks-container" class="p-4 overflow-auto flex-grow"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Integration Section -->
+    <section id="integration" class="py-24 bg-altbg border-t border-slate-200">
+        <div class="container mx-auto px-6">
+            <div class="text-center mb-16" data-aos="fade-up">
+                <h2 class="text-3xl font-bold text-slate-900 mb-4 flex items-center justify-center">
+                    <i class="fas fa-puzzle-piece text-rust mr-3"></i> Compilation & Integration
+                </h2>
+                <p class="text-slate-600 max-w-3xl mx-auto">
+                    Rustcript is fundamentally a library crate, designed to be embedded as a scripting engine within a larger host application. Choose the method that fits your project.
+                </p>
+            </div>
+
+            <div class="grid lg:grid-cols-2 gap-10">
+                <!-- Method 1 -->
+                <div class="border border-slate-200 rounded-2xl p-8 hover:shadow-lg transition" data-aos="fade-right">
+                    <div class="flex items-center mb-4">
+                        <span class="bg-rust text-white text-xs px-2 py-1 rounded font-bold mr-3">Recommended</span>
+                        <h4 class="text-xl font-bold text-slate-800">Method 1: Direct Cargo Integration</h4>
+                    </div>
+                    <p class="text-sm text-slate-500 mb-6">
+                        The easiest and most robust way to use Rustcript in another Rust project is to add it as a local path dependency in your project's <code>Cargo.toml</code>.
+                    </p>
+                    <div class="mb-4">
+                        <div class="text-xs font-bold text-slate-400 mb-1 uppercase">Cargo.toml</div>
+<pre><code class="language-toml text-sm rounded bg-slate-900 p-4">[package]
+name = "my_awesome_app"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+# Point this to your local rustcript folder.
+rustcript = { path = "/path/to/rustcript" }</code></pre>
+                    </div>
+                    <div>
+                        <div class="text-xs font-bold text-slate-400 mb-1 uppercase">main.rs</div>
+<pre><code class="language-rust text-sm rounded bg-slate-900 p-4">use rustcript::{Interpreter, Value, RustcriptObject};
+// ... your application logic ...</code></pre>
+                    </div>
+                </div>
+                <!-- Method 2 -->
+                <div class="border border-slate-200 rounded-2xl p-8 hover:shadow-lg transition flex flex-col h-full" data-aos="fade-left">
+                    <h4 class="text-xl font-bold text-slate-800 mb-2">Method 2: FFI (Non-Rust Projects)</h4>
+                    <p class="text-sm text-slate-500 mb-6">
+                        For integration with Python, C#, C++, etc., compile Rustcript into a C-compatible dynamic library (<code>.so</code> / <code>.dll</code>).
+                    </p>
+                    <div class="mb-4">
+                        <div class="text-xs font-bold text-slate-400 mb-1 uppercase">Step 1: Expose API</div>
+<pre><code class="language-rust text-sm rounded bg-slate-900 p-4">// In lib.rs or ffi.rs
+use rustcript::Interpreter;
+use std::ffi::{CStr, CString};
+use std::os::raw::c_char;
+
+#[no_mangle]
+pub extern "C" fn rustcript_run_script(
+    source_code: *const c_char
+) -> *mut c_char {
+    let c_str = unsafe { CStr::from_ptr(source_code) };
+    let source = c_str.to_str().unwrap_or("");
+    // ... run logic ...
+    let res = "OK".to_string();
+    CString::new(res).unwrap().into_raw()
+}</code></pre>
+                    </div>
+                    <div class="mt-auto">
+                        <div class="text-xs font-bold text-slate-400 mb-1 uppercase">Step 2: Cargo.toml</div>
+<pre><code class="language-toml text-sm rounded bg-slate-900 p-4">[lib]
+crate-type = ["cdylib"]</code></pre>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Testing Suites -->
+    <section id="testing" class="py-24 bg-[#0F172A] text-slate-300">
+        <div class="container mx-auto px-6">
+            <div class="text-center mb-16" data-aos="fade-up">
+                <h2 class="text-3xl font-bold text-white mb-4 flex items-center justify-center">
+                    <i class="fas fa-check-circle text-rust mr-3"></i> Comprehensive Testing
+                </h2>
+                <p class="text-slate-400 max-w-3xl mx-auto">
+                    The project includes a comprehensive test suite to ensure correctness and prevent regressions, divided into Rust-native tests and script-based E2E tests.
+                </p>
+            </div>
+            <div class="grid lg:grid-cols-2 gap-10">
+                <!-- Part 1 -->
+                <div class="border border-slate-700 rounded-2xl p-8 bg-[#162032]" data-aos="fade-right">
+                    <div class="flex justify-between items-center mb-4">
+                        <h4 class="text-xl font-bold text-white">Part 1: Rust Unit Tests</h4>
+                        <span class="bg-blue-900 text-blue-300 text-xs px-2 py-1 rounded border border-blue-700">Internal Logic</span>
+                    </div>
+                    <p class="text-sm text-slate-400 mb-6">
+                        These tests validate the core library functionality, such as the parser, type system, and the public API.
+                    </p>
+                    <div class="space-y-4">
+                        <div>
+                            <div class="text-xs text-slate-500 mb-1">Run all library tests:</div>
+                            <div class="bg-black p-3 rounded font-mono text-sm border-l-4 border-rust">
+                                <span class="text-rust">cargo</span> test
+                            </div>
+                        </div>
+                        <div>
+                            <div class="text-xs text-slate-500 mb-1">Run with detailed output:</div>
+                            <div class="bg-black p-3 rounded font-mono text-sm border-l-4 border-rust">
+                                <span class="text-rust">cargo</span> test -- --nocapture
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!-- Part 2 -->
+                <div class="border border-slate-700 rounded-2xl p-8 bg-[#162032]" data-aos="fade-left">
+                    <div class="flex justify-between items-center mb-4">
+                        <h4 class="text-xl font-bold text-white">Part 2: End-to-End Script Tests</h4>
+                        <span class="bg-green-900 text-green-300 text-xs px-2 py-1 rounded border border-green-700">Regression</span>
+                    </div>
+                    <p class="text-sm text-slate-400 mb-6">
+                        The <code>tests/test_runner.rc</code> script executes all example scripts to verify behavior from a user's perspective.
+                    </p>
+                    <div class="space-y-4">
+                        <div>
+                            <div class="text-xs text-slate-500 mb-1">1. Build with required features:</div>
+                            <div class="bg-black p-3 rounded font-mono text-sm text-wrap break-all border-l-4 border-yellow-500">
+                                <span class="text-rust">cargo</span> build <span class="text-white">--release</span> <span class="text-green-400">--features</span> <span class="text-yellow-200">"os_access file_io"</span>
+                            </div>
+                        </div>
+                        <div>
+                            <div class="text-xs text-slate-500 mb-1">2. Standard Run (Default Limits):</div>
+                            <div class="bg-black p-3 rounded font-mono text-sm text-wrap break-all border-l-4 border-blue-500">
+                                <span class="text-gray-400">./target/release/rustcript</span> tests/test_runner.rc
+                            </div>
+                        </div>
+                        <div>
+                            <div class="text-xs text-slate-500 mb-1">3. Unlimited Run (No Safety Limit):</div>
+                            <div class="bg-black p-3 rounded font-mono text-sm text-wrap break-all border-l-4 border-purple-500">
+                                <span class="text-gray-400">./target/release/rustcript</span> <span class="text-purple-400">--unlimited</span> tests/test_runner.rc
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- AI Powered Development -->
+    <section id="ai" class="py-24 bg-gradient-to-br from-white to-orange-50 relative overflow-hidden">
+        <div class="absolute inset-0 bg-grid-pattern opacity-30"></div>
+        <div class="container mx-auto px-6 relative z-10">
+            <div class="text-center mb-12">
+                <span class="text-rust font-bold tracking-widest uppercase text-sm">AI-Powered Development</span>
+                <h2 class="text-4xl font-bold text-slate-900 mt-2 flex items-center justify-center"><i class="fas fa-robot text-rust mr-3"></i> Built for the AI Era</h2>
+            </div>
+            <div class="bg-white rounded-3xl border border-slate-200 shadow-xl p-8 lg:p-12 relative overflow-hidden">
+                <div class="absolute top-0 right-0 w-64 h-64 bg-rust/5 rounded-bl-full pointer-events-none"></div>
+                <div class="flex flex-col lg:flex-row gap-12 items-center">
+                    <div class="lg:w-1/2">
+                        <h3 class="text-2xl font-bold text-slate-900 mb-4">The <code class="text-rust bg-orange-50 px-2 py-1 rounded border border-orange-100">AI_INSTRUCTIONS.md</code> File</h3>
+                        <p class="text-slate-600 mb-6 leading-relaxed">
+                            We treat AI as a first-class user. The project includes a dedicated "Prompt Engineering" document that acts as a single source of truth to turn any AI into an expert Rustcript developer.
+                        </p>
+                        <div class="space-y-4">
+                            <div class="flex items-start">
+                                <div class="w-8 h-8 rounded-lg bg-orange-100 flex items-center justify-center text-rust mr-3 mt-1"><i class="fas fa-robot"></i></div>
+                                <div>
+                                    <h5 class="font-bold text-slate-800 text-sm">System Prompting & Persona</h5>
+                                    <p class="text-xs text-slate-500">Primes the AI to act as a language specialist.</p>
+                                </div>
+                            </div>
+                            <div class="flex items-start">
+                                <div class="w-8 h-8 rounded-lg bg-orange-100 flex items-center justify-center text-rust mr-3 mt-1"><i class="fas fa-brain"></i></div>
+                                <div>
+                                    <h5 class="font-bold text-slate-800 text-sm">Deep Architectural Insights</h5>
+                                    <p class="text-xs text-slate-500">Explains internal logic (AST, jump_map, state machine) for better reasoning.</p>
+                                </div>
+                            </div>
+                            <div class="flex items-start">
+                                <div class="w-8 h-8 rounded-lg bg-orange-100 flex items-center justify-center text-rust mr-3 mt-1"><i class="fas fa-book"></i></div>
+                                <div>
+                                    <h5 class="font-bold text-slate-800 text-sm">Few-Shot Learning Zone</h5>
+                                    <p class="text-xs text-slate-500">Examples formatted as Task -> Thought Process -> Correct Code.</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="mt-8">
+                            <a href="AI_INSTRUCTIONS.md" class="inline-flex items-center text-white bg-rust hover:bg-rust-dark px-6 py-3 rounded-lg font-bold shadow-glow transition">
+                                View Instruction Manual <i class="fas fa-arrow-right ml-2"></i>
+                            </a>
+                        </div>
+                    </div>
+                    <div class="lg:w-1/2 w-full bg-slate-900 rounded-xl p-6 font-mono text-sm border border-slate-700 shadow-2xl">
+                        <div class="flex items-center space-x-2 mb-4">
+                            <div class="w-3 h-3 rounded-full bg-red-500"></div>
+                            <div class="w-3 h-3 rounded-full bg-yellow-500"></div>
+                            <div class="w-3 h-3 rounded-full bg-green-500"></div>
+                        </div>
+                        <div class="text-slate-400 mb-2 border-b border-slate-700 pb-2">User Prompt:</div>
+                        <div class="text-green-400 mb-6">"Write a script that reads 'config.json' and checks for maintenance mode."</div>
+                        <div class="text-slate-400 mb-2 border-b border-slate-700 pb-2">AI Response (Trained on Manual):</div>
+                        <div class="text-blue-300">
+                            import 'json'<br>
+                            if io.exists('config.json') [<br>
+                            &nbsp;&nbsp;content = io.read('config.json')<br>
+                            &nbsp;&nbsp;cfg = json.parse(content)<br>
+                            &nbsp;&nbsp;if cfg.maintenance_mode [<br>
+                            &nbsp;&nbsp;&nbsp;&nbsp;print 'System is down.'<br>
+                            &nbsp;&nbsp;]<br>
+                            ]
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Community & Documentation Hub -->
+    <section id="community" class="py-24 bg-white border-t border-slate-200">
+        <div class="container mx-auto px-6">
+            <div class="text-center mb-16" data-aos="fade-up">
+                <h2 class="text-3xl font-bold text-slate-900 flex items-center justify-center"><i class="fas fa-users text-rust mr-3"></i> Community & Documentation</h2>
+                <p class="text-slate-500 mt-2">Join the conversation and help shape the future of Rustcript.</p>
+            </div>
+            <div class="grid lg:grid-cols-2 gap-12">
+                <div class="bg-altbg p-8 rounded-2xl border border-slate-100 flex flex-col justify-center" data-aos="fade-right">
+                    <h3 class="text-2xl font-bold text-slate-800 mb-6 flex items-center"><i class="fas fa-book-open text-rust mr-3"></i> Official Manual</h3>
+                    <p class="text-slate-600 mb-8 leading-relaxed">
+                        The comprehensive guide to syntax, features, standard library, and host integration.
+                    </p>
+                    <a href="https://github.com/Eng-AliKazemi/Rustcript/blob/main/MANUAL.md" target="_blank" class="block bg-white border border-slate-200 hover:border-rust p-5 rounded-xl transition shadow-sm hover:shadow-md group">
+                        <div class="flex justify-between items-center">
+                            <div>
+                                <h4 class="font-bold text-slate-800 group-hover:text-rust transition">Read the Manual</h4>
+                                <p class="text-xs text-slate-500">github.com/.../MANUAL.md</p>
+                            </div>
+                            <i class="fas fa-external-link-alt text-slate-400 group-hover:text-rust"></i>
+                        </div>
+                    </a>
+                </div>
+                <div class="space-y-6" data-aos="fade-left">
+                    <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
+                        <h3 class="text-xl font-bold text-slate-800 mb-4 flex items-center"><i class="fas fa-comments text-blue-500 mr-2"></i> GitHub Discussions</h3>
+                        <p class="text-sm text-slate-600 mb-4">Connect with other members. Introduce yourself, ask questions, or share scripts.</p>
+                        <div class="grid grid-cols-2 gap-3 mb-4">
+                            <div class="flex items-center text-xs text-slate-600 bg-slate-50 p-2 rounded"><span class="text-lg mr-2">💬</span> General</div>
+                            <div class="flex items-center text-xs text-slate-600 bg-slate-50 p-2 rounded"><span class="text-lg mr-2">💡</span> Ideas</div>
+                            <div class="flex items-center text-xs text-slate-600 bg-slate-50 p-2 rounded"><span class="text-lg mr-2">🙏</span> Q&A</div>
+                            <div class="flex items-center text-xs text-slate-600 bg-slate-50 p-2 rounded"><span class="text-lg mr-2">🙌</span> Show & Tell</div>
+                        </div>
+                        <a href="https://github.com/Eng-AliKazemi/Rustcript/discussions" class="text-sm font-bold text-blue-600 hover:underline">Go to GitHub Discussions &rarr;</a>
+                    </div>
+                    <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200 relative overflow-hidden">
+                        <div class="absolute top-0 right-0 w-2 h-full bg-rust"></div>
+                        <h3 class="text-xl font-bold text-slate-800 mb-2 flex items-center"><i class="fas fa-code-branch text-rust mr-2"></i> Contribution Policy</h3>
+                        <p class="text-sm text-slate-600 mb-4">
+                            Want to contribute? Please discuss your idea in <strong>Discussions</strong> or an <strong>Issue</strong> <em>before</em> submitting a PR.
+                        </p>
+                        <div class="flex gap-4">
+                            <a href="https://github.com/Eng-AliKazemi/Rustcript/issues" class="text-xs bg-slate-100 hover:bg-slate-200 px-4 py-2 rounded font-bold text-slate-700 transition">Report Bug</a>
+                            <a href="https://github.com/Eng-AliKazemi/Rustcript/issues" class="text-xs bg-slate-100 hover:bg-slate-200 px-4 py-2 rounded font-bold text-slate-700 transition">Request Feature</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="bg-white text-slate-500 py-16 border-t border-slate-200">
+        <div class="container mx-auto px-6">
+            <div class="flex flex-col md:flex-row justify-between items-start">
+                <div class="mb-8 md:mb-0">
+                    <div class="flex items-center space-x-3 mb-4">
+                        <img src="logo.png" alt="Logo" class="h-8 w-8 grayscale opacity-70">
+                        <span class="font-bold text-xl tracking-tight text-slate-800">Rustcript</span>
+                    </div>
+                    <p class="text-sm max-w-xs mb-4">
+                        Open-source, community-driven scripting for the Rust ecosystem. Licensed under Apache 2.0.
+                    </p>
+                    <a href="https://github.com/Eng-AliKazemi/Rustcript" class="inline-flex items-center text-slate-400 hover:text-rust transition"><i class="fas fa-star mr-2"></i> Star us on GitHub</a>
+                </div>
+                <div class="grid grid-cols-2 gap-12">
+                    <div>
+                        <h5 class="font-bold mb-4 text-slate-800">Resources</h5>
+                        <ul class="space-y-2 text-sm">
+                            <li><a href="https://github.com/Eng-AliKazemi/Rustcript/blob/main/MANUAL.md" class="hover:text-rust transition">Documentation</a></li>
+                            <li><a href="AI_INSTRUCTIONS.md" class="hover:text-rust transition">AI Guide</a></li>
+                            <li><a href="#integration" class="hover:text-rust transition">Integration</a></li>
+                        </ul>
+                    </div>
+                    <div>
+                        <h5 class="font-bold mb-4 text-slate-800">Community</h5>
+                        <ul class="space-y-2 text-sm">
+                            <li><a href="https://github.com/Eng-AliKazemi/Rustcript/discussions" class="hover:text-rust transition">Discussions</a></li>
+                            <li><a href="https://github.com/Eng-AliKazemi/Rustcript/issues" class="hover:text-rust transition">Report Issues</a></li>
+                            <li><a href="https://linkedin.com/in/e-a-k" class="hover:text-rust transition">Contact Dev</a></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            <div class="border-t border-slate-100 mt-12 pt-8 text-center text-xs">
+                &copy; 2025 Rustcript Project. Created by Ali Kazemi.
+            </div>
+        </div>
+    </footer>
+
+    <!-- Scripts -->
+    <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-rust.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-bash.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-toml.min.js"></script>
+
+    <script>
+        AOS.init({ once: true, offset: 50, duration: 800 });
+
+        window.addEventListener('scroll', function() {
+            const nav = document.getElementById('navbar');
+            if (window.scrollY > 50) { nav.classList.add('shadow-soft'); }
+            else { nav.classList.remove('shadow-soft'); }
+        });
+
+        // --- CODE EXPLORER SCRIPT ---
+
+        const examples = {
+            basics: {
+                '01_basics.rc': `print '--- 01 BASICS ---'\n\n# 1. Variable Assignment (Natural Syntax)\nplayer_name = 'Hero'\nprint 'Welcome, {player_name}!'\n\n# 2. Input\nprint 'Please enter your age:'\ninput age\n\n# 3. Variable Interpolation\nprint 'You entered: {age}'\n\nprint '--- END ---'`,
+                '08_guessing_game.rc': `print '--- GUESS THE NUMBER ---'\nprint 'I have picked a number (fixed at 42).'\n\nsecret = 42\nattempts = 0\n\nwhile true [\n    attempts += 1\n    print 'Enter your guess:'\n    input guess\n\n    if guess == secret [\n        print 'CORRECT! You found it in {attempts} attempts.'\n        break\n    ] else_if guess < secret [\n        print 'Too low! Try again.'\n    ] else [\n        print 'Too high! Try again.'\n    ]\n]\n\nprint '--- GAME OVER ---'`
+            },
+            control_flow: {
+                '04_structured_logic.rc': `print '--- 04 STRUCTURED LOGIC ---'\n\npower_level = 9500\n\nif power_level > 9000 [\n    print 'Its over 9000!'\n] else_if power_level > 5000 [\n    print 'Its a decent power level.'\n] else [\n    print 'Power level is low.'\n]\n\nprint '--- END ---'`,
+                '05_loops.rc': `print '--- 05 LOOPS ---'\n\nprint '1. While Loop:'\ncount = 3\nwhile count > 0 [\n    print 'Countdown: {count}'\n    count -= 1\n]\n\nprint '2. Nested For Loops:'\nfor row 1 3 [\n    for col 1 3 [\n        print 'Cell: {row}, {col}'\n    ]\n]\n\nprint '--- END ---'`,
+                '06_match.rc': `print '--- 06 MATCH ---'\n\nstatus = 200\nmatch status [\n    case 200 [ print '>> OK' ]\n    case 404 [ print '>> Not Found' ]\n    default [ print '>> Unknown Status' ]\n]\n\nfruit = 'apple'\nmatch fruit [\n    case 'banana' [ print '>> Yellow' ]\n    case 'apple' [ print '>> Red' ]\n]\n\nprint '--- END ---'`,
+                '12_try_catch.rc': `print '--- 12 TRY / CATCH ---'\n\nvec = {1, 2}\n\ntry [\n    # This will fail\n    val = vec.5 \n] catch [\n    print '>> CAUGHT ERROR: {LAST_ERROR}'\n]\n\nprint 'Continuing execution...'\n\nprint '--- END ---'`
+            },
+            data_structures: {
+                '10_complex_types.rc': `print '--- 10 COMPLEX TYPES ---'\n\n# Tuples\nperson = ('John', 30, true)\nprint 'Tuple: {person}'\nprint 'Access Index 0: {person.0}'\n\n# Vectors\nfruits = {'apple', 'banana'}\nprint 'Vector: {fruits}'\n\n# HashMaps\ncapitals = {'France': 'Paris'}\nprint 'Capital of France: {capitals.France}'\n\nprint '--- END ---'`,
+                '11_methods_loops.rc': `print '--- 11 METHODS & LOOPS ---'\n\nstack = {10, 20}\nmethod stack.push(30)\npopped_val = stack.pop()\nprint 'Stack after pop: {stack}'\n\ninventory = {'wood': 5}\nmethod inventory.insert('iron', 3)\nkeys = inventory.keys()\nprint 'Inventory Keys: {keys}'\n\nnums = {1, 2, 3}\nforeach n in nums [\n    print 'Number: {n}'\n]\n\nprint '--- END ---'`,
+                '21_arrays.rc': `print '--- 21 ARRAY SYNTAX SUGAR ---'\n\nlist = {10, 20, 30}\nlist[0] = 99\nprint 'Updated list: {list}'\n\nuser = {'name': 'Alice'}\nuser['score'] = 200\nprint 'Updated user: {user}'\n\nmatrix = {{1, 2}, {3, 4}}\nval = matrix[1][0]\nprint 'matrix[1][0]: {val}'\n\nprint '--- END ---'`
+            },
+            functions: {
+                '13_functions.rc': `print '--- 13 FUNCTIONS ---'\n\nfunction greet name [\n    print '>> Hello, {name}!'\n]\ngreet('rustcript')\n\nfunction add a b [\n    sum a + b\n    return sum\n]\nresult = add(10, 25)\nprint '10 + 25 = {result}'\n\nfunction factorial n [\n    if n <= 1 [ return 1 ]\n    return n * factorial(n - 1)\n]\nf5 = factorial(5)\nprint '5! = {f5}'\n\nprint '--- END ---'`,
+                '24_first_class_funcs.rc': `print '--- 24 FIRST-CLASS FUNCTIONS ---'\n\nfunction add a b [ return a + b ]\nmath_op = add\nresult = math_op(10, 5)\nprint 'math_op(10, 5) = {result}'\n\nfunction process_numbers list op_func [\n    new_list = {}\n    foreach n in list [\n        val = op_func(n, 2)\n        method new_list.push(val)\n    ]\n    return new_list\n]\ndata = {1, 2, 3}\nres1 = process_numbers(data, add)\nprint 'Result (Add 2): {res1}'\n\nprint '--- END ---'`,
+                '09_scopes.rc': `print '--- 09 SCOPES ---'\n\nglobal g_score = 100\nprint 'Main Start: Global Score is {g_score}'\n\ncall subroutine\n\nprint 'Main End: Global Score is {g_score}'\ngoto end\n\nlabel subroutine\n    g_score = 1000\n    var l_temp = 999\n    return\n\nlabel end\nprint '--- END ---'`
+            },
+            modules: {
+                '14_imports_main.rc': `print '--- 14 IMPORTS TEST ---'\n\n# Assumes 14_imports_lib.rc exists\nimport '14_imports_lib.rc'\n\nprint 'PI Value: {MATH_PI}'\n\nresult = calculate_circle_area(10)\nprint 'Area (r=10): {result}'\n\nprint '--- END ---'`,
+                '19_modules_main.rc': `print '--- 19 MODULES SYSTEM ---'\n\n# Assumes 19_modules_lib.rc exists\nimport '19_modules_lib.rc' as Service\n\nSTATUS = 'Main_Idle'\nprint 'Main Scope STATUS: {STATUS}'\nprint 'Service Scope STATUS: {Service.STATUS}'\n\ncurrent = Service.get_status()\nprint 'Result from getter: {current}'\n\nprint '--- END ---'`
+            },
+            stdlib: {
+                '02_math_and_types.rc': `print '--- 02 MATH & TYPES ---'\n\na = 10 + 5\nprint '10 + 5 = {a}'\n\nscore = 100\nscore += 50\nprint 'Score: {score}'\n\nis_admin = true\naccess_granted = is_admin || false\nprint 'Access: {access_granted}'\n\nage = 20\nis_adult = age >= 18\nprint 'Is Adult: {is_adult}'\n\nprint '--- END ---'`,
+                '17_string_manipulation.rc': `print '--- 17 STRING MANIPULATION ---'\n\noriginal = 'rustcript'\nupper = original.to_upper()\nprint 'Upper: {upper}'\n\ncsv_data = 'a,b,c'\nitems = csv_data.split(',')\nprint 'Item 1: {items.1}'\n\nrejoined = items.join(' | ')\nprint 'Rejoined: {rejoined}'\n\nprint '--- END ---'`,
+                '18_math_rand_regex.rc': `print '--- 18 MATH, RAND, REGEX ---'\n\nroot = math.sqrt(25)\nprint 'Sqrt(25): {root}'\n\nr_int = rand.int(1, 100)\nprint 'Random Int (1-100): {r_int}'\n\nemail = 'user@example.com'\npattern = '^.+@.+\\..+$'\nvalid = email.is_match(pattern)\nprint 'Is email valid? {valid}'\n\nprint '--- END ---'`,
+                '20_json.rc': `print '--- 20 JSON SUPPORT ---'\n\njson_str = '{"name": "Alice"}'\ndata = json.parse(json_str)\nprint 'Parsed Name: {data.name}'\n\ndata.age = 26\ncompact = json.stringify(data)\nprint 'Compact: {compact}'\n\npretty = json.stringify(data, true)\nprint 'Pretty:\\n{pretty}'\n\nprint '--- END ---'`
+            },
+            advanced: {
+                '23_file_io.rc': `print '--- 23 SANDBOXED FILE I/O ---'\n\nfilename = 'test.txt'\nmethod io.write(filename, 'Hello!')\n\nread_back = io.read(filename)\nprint 'Content: {read_back}'\n\ntry [\n    io.read('../Cargo.toml')\n] catch [\n    print '>> SUCCESS: Caught: {LAST_ERROR}'\n]\n\nmethod io.delete(filename)\n\nprint '--- END ---'`,
+                '22_safety_limit.rc': `print '--- 22 SAFETY LIMIT TEST ---'\nprint 'This script attempts an infinite loop.'\n\nwhile true [\n    # The interpreter will abort this.\n]\n\nprint 'ERROR: This should not be reached.'`,
+                '07_host_commands.rc': `print '--- 07 HOST COMMANDS ---'\n\nprint 'Testing \\'beep\\'...'\nexec beep\n\nprint 'Waiting 1s...'\nexec wait 1000\n\nprint 'Done.'\n\nprint '--- END ---'`,
+                '03_legacy_flow.rc': `print '--- 03 LEGACY FLOW ---'\n\ncounter = 0\nlabel start_loop\n    counter += 1\n    if counter < 3 start_loop\n\ncall my_subroutine\ngoto end\n\nlabel my_subroutine\n    print '>> Inside Subroutine'\n    return\n\nlabel end\nprint '--- END ---'`
+            }
+        };
+
+        const codeBlocksContainer = document.getElementById('code-blocks-container');
+        const fileTabsContainer = document.getElementById('file-tabs-container');
+
+        // Pre-populate all code blocks
+        for (const category in examples) {
+            for (const fileName in examples[category]) {
+                const pre = document.createElement('pre');
+                pre.id = `code-${fileName.replace(/\./g, '_')}`;
+                pre.className = 'code-block hidden';
+                pre.dataset.category = category;
+
+                const code = document.createElement('code');
+                code.className = 'language-rust code-font text-sm';
+                code.textContent = examples[category][fileName];
+                pre.appendChild(code);
+                codeBlocksContainer.appendChild(pre);
+            }
+        }
+
+        function switchCategory(categoryName) {
+            document.querySelectorAll('.category-btn').forEach(btn => btn.classList.remove('active'));
+            document.getElementById(`btn-cat-${categoryName}`).classList.add('active');
+
+            fileTabsContainer.innerHTML = '';
+            const files = Object.keys(examples[categoryName]);
+            files.forEach((fileName, index) => {
+                const btn = document.createElement('button');
+                btn.textContent = fileName;
+                btn.id = `file-tab-${fileName.replace(/\./g, '_')}`;
+                btn.className = 'file-tab-btn text-xs font-mono px-3 py-1 rounded-md text-slate-400 hover:bg-slate-700 transition';
+                btn.onclick = () => switchFile(fileName);
+                fileTabsContainer.appendChild(btn);
+            });
+
+            if (files.length > 0) {
+                switchFile(files[0]);
+            }
+
+            // This logic was for changing the background, which is not needed and was part of the bug. Removing for clarity.
+        }
+
+        function switchFile(fileName) {
+            document.querySelectorAll('.code-block').forEach(el => el.classList.add('hidden'));
+
+            const blockId = `code-${fileName.replace(/\./g, '_')}`;
+            const block = document.getElementById(blockId);
+            if(block) {
+                block.classList.remove('hidden');
+                Prism.highlightElement(block.querySelector('code'));
+            }
+
+            document.querySelectorAll('.file-tab-btn').forEach(btn => btn.classList.remove('active'));
+            const tabId = `file-tab-${fileName.replace(/\./g, '_')}`;
+            const tab = document.getElementById(tabId);
+            if(tab) {
+                tab.classList.add('active');
+            }
+        }
+
+        // Initialize to the first category on page load
+        document.addEventListener('DOMContentLoaded', () => {
+            switchCategory('basics');
+        });
+
+    </script>
+</body>
+</html>
