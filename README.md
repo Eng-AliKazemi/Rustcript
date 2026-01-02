@@ -396,6 +396,6 @@ For a complete list of third-party dependencies and their versions, please see t
 
 ## 14. Contact
 
-To get in touch with the developer, please use the following link:
+Developed by Aran Kazemi, [**IBM**](https://en.wikipedia.org/wiki/IBM) Certified AI Engineer.
 
 <a href="https://linkedin.com/in/e-a-k" target="_blank"><img src="https://img.shields.io/badge/Connect-LinkedIn-0077B5?style=for-the-badge&logo=linkedin&logoColor=white&labelColor=555" alt="Connect on LinkedIn"/></a>
